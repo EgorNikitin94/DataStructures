@@ -7,8 +7,8 @@
 
 import Foundation
 
-public struct Stack<T> {
-  private var array: Array<T>
+public struct Stack<Item> {
+  private var array: Array<Item>
   
   public var count: Int {
     array.count
@@ -18,20 +18,20 @@ public struct Stack<T> {
     array.isEmpty
   }
   
-  public init(with array: [T] = Array<T>()) {
+  public init(with array: [Item] = Array<Item>()) {
     self.array = array
   }
   
-  public mutating func push(_ value: T) {
+  public mutating func push(_ value: Item) {
     array.append(value)
   }
   
   @discardableResult
-  public mutating func pop() -> T? {
+  public mutating func pop() -> Item? {
     array.popLast()
   }
   
-  public func top() -> T? {
+  public func top() -> Item? {
     array.last
   }
 }
