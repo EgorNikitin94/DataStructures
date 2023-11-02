@@ -8,7 +8,7 @@
 import Foundation
 
 public struct Queue<Item> {
-  var array: [Item]
+  private var array: [Item]
   
   public var isEmpty: Bool {
     array.isEmpty
@@ -27,7 +27,7 @@ public struct Queue<Item> {
   }
   
   public mutating func dequeue() -> Item? {
-    array.removeLast()
+    array.removeFirst()
   }
   
   public func front() -> Item? {
