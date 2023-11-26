@@ -7,31 +7,96 @@
 
 import Foundation
 
-struct SortedArray<Item> where Item: Equatable & Comparable {
-  private var array: Array<Item>
+public struct OrderedArray<Item> where Item: Comparable {
+  private(set) var array: Array<Item>
   
-  var isEmpty: Bool {
+  public var isEmpty: Bool {
     array.isEmpty
   }
   
-  var count: Int {
+  public var count: Int {
     array.count
   }
   
-  init(with array: Array<Item> = []) {
+  public init(with array: Array<Item> = []) {
     self.array = array.sorted()
   }
   
-  func insert(_ item: Item) {
-    
+  public mutating func insert(_ item: Item) {
+    let index = if let min = array.first, item < min {
+      0
+    } else if let max = array.last, item > max {
+      array.count
+    } else if array.isEmpty {
+      0
+    } else {
+      findInsertIndex(for: item, in: Range(uncheckedBounds: (lower: 0, upper: array.count - 1)))
+    }
+    array.insert(item, at: index)
   }
   
-  private func searchInsertIndex(for item: Item) -> Int {
-    guard !array.isEmpty else { return 0 }
-    var index: Int = array.count / 2
-    var startIndex = 0
-    var endIndex = array.count - 1
+  public mutating func insert(_ items: [Item]) {
+    items.forEach({ insert($0) })
+  }
+  
+  @discardableResult
+  public mutating func remove(_ item: Item) -> Item? {
+    if let index = findItemIndex(item, in: 0 ..< array.count) {
+      return removeAtIndex(index)
+    }
+    return nil
+  }
+  
+  @discardableResult
+  public mutating func remove(_ items: [Item]) -> [Item] {
+    return items.compactMap({ remove($0) })
+  }
+  
+  @discardableResult
+  public mutating func removeAtIndex(_ index: Int) -> Item {
+    array.remove(at: index)
+  }
+}
+
+extension OrderedArray: CustomStringConvertible {
+  public var description: String {
+    "OrderedArray: " + array.description
+  }
+}
+
+
+private extension OrderedArray {
+  private func findInsertIndex(for item: Item, in range: Range<Int>) -> Int {
+    if range.lowerBound == range.upperBound {
+      return range.lowerBound
+    }
     
-    return 2
+    let midIndex = ((range.upperBound - range.lowerBound) / 2) + range.lowerBound
+    let midItem = array[midIndex]
+    
+    if item > midItem {
+      return findInsertIndex(for: item, in: Range(uncheckedBounds: (lower: midIndex + 1, upper: range.upperBound)))
+    } else if item < midItem  {
+      return findInsertIndex(for: item, in: Range(uncheckedBounds: (lower: range.lowerBound, upper: midIndex)))
+    } else {
+      return midIndex
+    }
+  }
+  
+  private func findItemIndex(_ item: Item, in range: Range<Int>) -> Int? {
+    if range.lowerBound >= range.upperBound {
+      return nil
+    } else {
+      let midIndex = ((range.upperBound - range.lowerBound) / 2) + range.lowerBound
+      let midItem = array[midIndex]
+      
+      if item > midItem {
+        return findItemIndex(item, in: midIndex + 1 ..< range.upperBound)
+      } else if item < midItem {
+        return findItemIndex(item, in: range.lowerBound ..< midIndex)
+      } else {
+        return midIndex
+      }
+    }
   }
 }
