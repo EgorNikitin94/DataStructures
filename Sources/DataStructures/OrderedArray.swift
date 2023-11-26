@@ -30,7 +30,7 @@ public struct OrderedArray<Item> where Item: Comparable {
     } else if array.isEmpty {
       0
     } else {
-      findInsertIndex(for: item, in: Range(uncheckedBounds: (lower: 0, upper: array.count - 1)))
+      findInsertIndex(for: item, in: 0 ..< array.count - 1)
     }
     array.insert(item, at: index)
   }
@@ -58,13 +58,36 @@ public struct OrderedArray<Item> where Item: Comparable {
   }
 }
 
+//MARK: - CustomStringConvertible
 extension OrderedArray: CustomStringConvertible {
   public var description: String {
     "OrderedArray: " + array.description
   }
 }
 
+//MARK: - Collection
+extension OrderedArray: Collection {
+  
+  public typealias Index = Int
 
+  public var startIndex: Index {
+    array.startIndex
+  }
+  
+  public var endIndex: Index {
+    array.endIndex
+  }
+  
+  public func index(after i: Index) -> Index {
+    i + 1
+  }
+  
+  public subscript(position: Index) -> Item {
+    array[position]
+  }
+}
+
+//MARK: - Private
 private extension OrderedArray {
   private func findInsertIndex(for item: Item, in range: Range<Int>) -> Int {
     if range.lowerBound == range.upperBound {
@@ -75,9 +98,9 @@ private extension OrderedArray {
     let midItem = array[midIndex]
     
     if item > midItem {
-      return findInsertIndex(for: item, in: Range(uncheckedBounds: (lower: midIndex + 1, upper: range.upperBound)))
+      return findInsertIndex(for: item, in: midIndex + 1 ..< range.upperBound)
     } else if item < midItem  {
-      return findInsertIndex(for: item, in: Range(uncheckedBounds: (lower: range.lowerBound, upper: midIndex)))
+      return findInsertIndex(for: item, in: range.lowerBound ..< midIndex)
     } else {
       return midIndex
     }
@@ -86,17 +109,17 @@ private extension OrderedArray {
   private func findItemIndex(_ item: Item, in range: Range<Int>) -> Int? {
     if range.lowerBound >= range.upperBound {
       return nil
+    }
+    
+    let midIndex = ((range.upperBound - range.lowerBound) / 2) + range.lowerBound
+    let midItem = array[midIndex]
+    
+    if item > midItem {
+      return findItemIndex(item, in: midIndex + 1 ..< range.upperBound)
+    } else if item < midItem {
+      return findItemIndex(item, in: range.lowerBound ..< midIndex)
     } else {
-      let midIndex = ((range.upperBound - range.lowerBound) / 2) + range.lowerBound
-      let midItem = array[midIndex]
-      
-      if item > midItem {
-        return findItemIndex(item, in: midIndex + 1 ..< range.upperBound)
-      } else if item < midItem {
-        return findItemIndex(item, in: range.lowerBound ..< midIndex)
-      } else {
-        return midIndex
-      }
+      return midIndex
     }
   }
 }

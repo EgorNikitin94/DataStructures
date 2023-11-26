@@ -28,10 +28,14 @@ final class DataStructuresTests: XCTestCase {
     
     var orderedArray = OrderedArray<Int>(with: array)
     orderedArray.insert(insertedArray)
+    
 
     let resultArray = orderedArray.remove(insertedArray)
+    
+    let num = orderedArray[1]
 
     XCTAssertEqual(orderedArray.array, array)
     XCTAssertEqual(resultArray, insertedArray)
+    XCTAssert(num == 2)
   }
 }

@@ -34,3 +34,25 @@ public struct Queue<Item> {
     array.first
   }
 }
+
+//MARK: - Collection
+extension Queue: Collection {
+  
+  public typealias Index = Int
+
+  public var startIndex: Index {
+    array.startIndex
+  }
+  
+  public var endIndex: Index {
+    array.endIndex
+  }
+  
+  public func index(after i: Index) -> Index {
+    i + 1
+  }
+  
+  public subscript(position: Index) -> Item {
+    array[position]
+  }
+}
