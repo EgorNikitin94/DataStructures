@@ -7,31 +7,55 @@
 
 import Foundation
 
-public struct Queue<Item> {
-  private var array: [Item]
+fileprivate final class BackendQueue<Item> {
+  var array: [Item]
   
-  public var isEmpty: Bool {
-    array.isEmpty
-  }
-  
-  public var count: Int {
-    array.count
-  }
-  
-  public init(with array: [Item] = Array<Item>()) {
+  init(array: [Item] = Array<Item>()) {
     self.array = array
   }
   
-  public mutating func enqueue(_ element: Item) {
+  func enqueue(_ element: Item) {
     array.append(element)
   }
   
-  public mutating func dequeue() -> Item? {
+  func dequeue() -> Item? {
     array.removeFirst()
   }
   
-  public func front() -> Item? {
+  func front() -> Item? {
     array.first
+  }
+  
+  func copy() -> BackendQueue<Item> {
+    BackendQueue<Item>(array: array)
+  }
+}
+
+public struct Queue<Item> {
+  private var internalQueue: BackendQueue<Item>
+  
+  public init(with array: [Item] = Array<Item>()) {
+    self.internalQueue = BackendQueue<Item>(array: array)
+  }
+  
+  public mutating func enqueue(_ element: Item) {
+    checkUniquelyReferencedInternalQueue()
+    internalQueue.enqueue(element)
+  }
+  
+  public mutating func dequeue() -> Item? {
+    checkUniquelyReferencedInternalQueue()
+    return internalQueue.dequeue()
+  }
+  
+  public func front() -> Item? {
+    internalQueue.front()
+  }
+  
+  private mutating func checkUniquelyReferencedInternalQueue() {
+    if !isKnownUniquelyReferenced(&internalQueue) {
+      internalQueue = internalQueue.copy()
+    }
   }
 }
 
@@ -41,11 +65,11 @@ extension Queue: Collection {
   public typealias Index = Int
 
   public var startIndex: Index {
-    array.startIndex
+    internalQueue.array.startIndex
   }
   
   public var endIndex: Index {
-    array.endIndex
+    internalQueue.array.endIndex
   }
   
   public func index(after i: Index) -> Index {
@@ -53,6 +77,6 @@ extension Queue: Collection {
   }
   
   public subscript(position: Index) -> Item {
-    array[position]
+    internalQueue.array[position]
   }
 }

@@ -22,6 +22,19 @@ final class DataStructuresTests: XCTestCase {
     XCTAssertTrue(stack.count == 2)
   }
   
+  func testQueue() throws {
+    var queue = Queue<String>()
+    queue.enqueue("A")
+    queue.enqueue("B")
+    let str = queue.dequeue()
+    let strTwo = queue.dequeue()
+    
+    XCTAssertTrue(str == "A")
+    XCTAssertTrue(strTwo == "B")
+    
+    XCTAssertTrue(queue.isEmpty)
+  }
+  
   func testOrderedArray() throws {
     let array = [1, 2, 4, 6, 7, 9, 23, 45, 67, 89].sorted()
     let insertedArray = [0, 3, 8, 10, 42, 80, 100]

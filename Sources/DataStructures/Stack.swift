@@ -7,32 +7,57 @@
 
 import Foundation
 
-public struct Stack<Item> {
-  private var array: Array<Item>
+fileprivate final class BackendStack<Item> {
+  var array: Array<Item>
   
-  public var count: Int {
-    array.count
-  }
-  
-  public var isEmpty: Bool {
-    array.isEmpty
-  }
-  
-  public init(with array: [Item] = Array<Item>()) {
+  init(with array: [Item] = Array<Item>()) {
     self.array = array
   }
   
-  public mutating func push(_ value: Item) {
+  func push(_ value: Item) {
     array.append(value)
   }
   
   @discardableResult
-  public mutating func pop() -> Item? {
+  func pop() -> Item? {
     array.popLast()
   }
   
-  public func top() -> Item? {
+  func top() -> Item? {
     array.last
+  }
+  
+  func copy() -> BackendStack<Item> {
+    BackendStack<Item>(with: array)
+  }
+}
+
+public struct Stack<Item> {
+  private var internalStack: BackendStack<Item>
+  
+  public init(with array: [Item] = Array<Item>()) {
+    self.internalStack = BackendStack<Item>(with: array)
+  }
+  
+  public mutating func push(_ value: Item) {
+    checkUniquelyReferencedInternalStack()
+    internalStack.push(value)
+  }
+  
+  @discardableResult
+  public mutating func pop() -> Item? {
+    checkUniquelyReferencedInternalStack()
+    return internalStack.pop()
+  }
+  
+  public func top() -> Item? {
+    internalStack.top()
+  }
+  
+  private mutating func checkUniquelyReferencedInternalStack() {
+    if !isKnownUniquelyReferenced(&internalStack) {
+      internalStack = internalStack.copy()
+    }
   }
 }
 
@@ -42,11 +67,11 @@ extension Stack: Collection {
   public typealias Index = Int
 
   public var startIndex: Index {
-    array.startIndex
+    internalStack.array.startIndex
   }
   
   public var endIndex: Index {
-    array.endIndex
+    internalStack.array.endIndex
   }
   
   public func index(after i: Index) -> Index {
@@ -54,6 +79,6 @@ extension Stack: Collection {
   }
   
   public subscript(position: Index) -> Item {
-    array[position]
+    internalStack.array[position]
   }
 }
